@@ -31,9 +31,52 @@ const pipe = new pipe_get();
 
 //실제 화면에 표시될 객체들
 class gamePage {
+    css = {
+        backgroundColor,
+        fieldSize,
+        fontColor,
+        fontSize,
+    }
+    gameInfo = {
+        gameTitle : "mineField game",
+        life : 0,
+        fieldSize : 0,
+        bombNum : 0,
+
+    }
+    constructor(){
+        this.css.backgroundColor = "white";
+        this.css.fieldSize = "30";
+        this.css.fontColor = "black";
+        this.css.fontSize = "14";
+    }
+    Create() {
+        const gamePage = document.createElement("div");
+        gamePage.className = "gamePage";
+    }
+
+    makeHead(){
+        const pageHead = document.createElement("div");
+        pageHead.className = "gamePagehead";
+        pageHead.style.display = "block";
+        pageHead.style.alignItems = "center";
+
+        const gameTitle = document.createElement("div");
+        gameTitle.innerText = "mine field game";
+
+        const playerName = document.createElement("div");
+        
+        const gameInfo = document.createElement("div");
+        const bombNum = document.createElement("div");
+        const plagNum = document.createElement("div");
+        const lifeNum = document.createElement("div");
+        const playTime = document.createElement("div");
+        
+    }
     //머리 - 게임명, 폭탄수, 깃발수, 목숨 개수, 플탐 시간,  
     //본문 - 필드들
     //바닥 - 전체수
+
 }
 class field {
     //값 - 폭탄여부, 근처 폭탄 수, 공개 여부, 깃발 여부
@@ -52,12 +95,23 @@ class resultPage {
     //본문 - 총 계산 점수, 순위, 게임 플레이어명 입력란
     //바닥 - 게임 플레이어 순위(점수로, 성공여부로 나눠서,)
 }
+
 function makeMineFieldArray(row, colum, bombNum) {
-    let array = []; 
-    for (let i = 0; i < row; i++) { 
+    class field {
+        bombBool; restBoomNum; openBool; flagBool;
+        constructor() { this.bombBool = 0; this.restBoomNum = 0; this.openBool = 0; this.flagBool = 0; }
+
+        returnValue() {
+            return `${this.bombBool},${this.restBoomNum},${this.openBool},${this.flagBool}`;
+        }
+    }
+    let array = []; //최종 결과물
+
+    //기본 필드 생성
+    for (let i = 0; i < row; i++) {
         let newArr = [];
-        for (let j = 0; j < colum; j++) { newArr.push("o"); }
-        array.push(newArr); 
+        for (let j = 0; j < colum; j++) { newArr.push(new field()); }
+        array.push(newArr);
     }
     bombCount = Math.floor((row * colum) * (bombNum / 100));
 
@@ -65,19 +119,48 @@ function makeMineFieldArray(row, colum, bombNum) {
     let ColumArr = []; for (let i = 0; i < colum; i++) { ColumArr.push(i) };
     function shuffle(arr) { arr.sort(() => Math.random() - 0.5); }
 
-    let ranBomArr = []; 
-    for(let i=0; i<row * colum; i++){ranBomArr.push( Math.floor(Math.random() * 2) )};
+    let ranBomArr = [];
+    for (let i = 0; i < row * colum; i++) { ranBomArr.push(Math.floor(Math.random() * 2)) };
 
+    //폭탄 생성
     let exa = [];
     exBombCount = 0;
-    while(exBombCount < bombCount){
-        shuffle(RowArr); shuffle(ColumArr); 
-        if(Math.floor(Math.random() * 2) == 1){
+    while (exBombCount < bombCount) {
+        shuffle(RowArr); shuffle(ColumArr);
+        if (Math.floor(Math.random() * 2) == 1) {
             exa.push([RowArr[0], ColumArr[0]]);
-            array[ RowArr[0] ][ ColumArr[0] ] = "x";
+            array[RowArr[0]][ColumArr[0]].bombBool = 1;
             exBombCount += 1;
         }
     }
+
+    let rarrArr = [];
+    for (let i = 0; i < array.length; i++) {
+        rarrArr.push([])
+        for (let j = 0; j < array[i].length; j++) {
+            rarrArr[i].push(array[i][j].returnValue());
+        }
+    }
+    console.log(rarrArr);
+    //폭탄 근처 필드 숫자 생성
+    for (let i = 0; i < row; i++) {
+        for (let j = 0; j < colum; j++) {
+            if (array[i][j].bombBool == 1) {
+                //위(x+1) 아래(x-) 옆(y+) 옆(y-) 대각선 위위(x+ y--)(x+ y++) 아래아래(x- y++)(x- y--)
+                if (i + 1 <= row - 1) { array[i + 1][j].restBoomNum += 1 }
+                if (i - 1 >= 0) { array[i - 1][j].restBoomNum += 1 }
+                if (j + 1 <= colum - 1) { array[i][j + 1].restBoomNum += 1 }
+                if (j - 1 >= 0) { array[i][j - 1].restBoomNum += 1 }
+
+                if (i + 1 <= row - 1 && j - 1 >= 0) { array[i + 1][j - 1].restBoomNum += 1 }
+                if (i + 1 <= row - 1 && j + 1 <= colum - 1) { array[i + 1][j + 1].restBoomNum += 1 }
+
+                if (i - 1 >= 0 && j - 1 >= 0) { array[i - 1][j - 1].restBoomNum += 1 }
+                if (i - 1 >= 0 && j + 1 <= colum - 1) { array[i - 1][j + 1].restBoomNum += 1 }
+            }
+        }
+    }
+
     return array;
 }
 
@@ -129,5 +212,12 @@ class Controller {
 //================
 const mainDiv = document.querySelector(".main");
 
-let rarr = makeMineFieldArray(10, 8, 20);
-console.log(rarr);
+let rarr = makeMineFieldArray(5, 5, 20);
+let rarrArr = [];
+for (let i = 0; i < rarr.length; i++) {
+    rarrArr.push([])
+    for (let j = 0; j < rarr[i].length; j++) {
+        rarrArr[i].push(rarr[i][j].returnValue());
+    }
+}
+console.log(rarrArr);
