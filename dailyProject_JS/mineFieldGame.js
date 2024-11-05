@@ -29,54 +29,227 @@ class pipe_send {
 }
 const pipe = new pipe_get();
 
+
+function emtyFieldRe(x, y){
+    let target = document.querySelector(`.f_${x}_${y}`);
+    //console.log(x, y);
+    //console.log(target);
+    if(target == null){ return; }
+    let value = target.value.split(",");
+    let info = {
+        bombBool : Number(value[0]), 
+        restBoomNum : Number(value[1]),
+        openBool : Number(value[2]),
+        flagBool : Number(value[3]),
+    } 
+    if(info.openBool == 0){
+        if(info.restBoomNum == 0){
+            target.innerText = " ";
+            target.style.border = "none";
+            info.openBool = 1;
+            target.value = `${info.bombBool},${info.restBoomNum},${info.openBool},${info.plagNum}`;
+            x = Number(x); y = Number(y);
+
+            emtyFieldRe(x + 1,  y); //위
+            emtyFieldRe(x - 1,  y); //아래 
+            emtyFieldRe(x , y - 1); //왼옆
+            emtyFieldRe(x , y - 1); //오엽
+            
+            emtyFieldRe(x + 1, y - 1); //대각선 위 왼
+            emtyFieldRe(x + 1, y + 1); //대각선 위 오
+            emtyFieldRe(x - 1, y - 1); //대각선 아래 왼
+            emtyFieldRe(x - 1, y + 1); //대각선 아래 오
+        }else if(info.restBoomNum > 0){
+            info.openBool = 1;
+            target.value = `${info.bombBool},${info.restBoomNum},${info.openBool},${info.plagNum}`;
+            target.innerText = info.restBoomNum;
+            target.style.border = "none";
+        }
+    }
+}
+
 //실제 화면에 표시될 객체들
 class gamePage {
     css = {
-        backgroundColor,
-        fieldSize,
-        fontColor,
-        fontSize,
+        backgroundColor : "white",
+        fieldSize :"30",
+        fontColor :"black",
+        fontSize :"14",
+        fontFamily :"sans-serif"
     }
     gameInfo = {
         gameTitle : "mineField game",
-        life : 0,
-        fieldSize : 0,
-        bombNum : 0,
-
+        lifeNum : 0,
+        fieldWidth : 6,
+        fieldHeight : 5,
+        bombNum : 5,
+        plagNum : 0,
+        playerName : "player",
+        playTime : "00:00"
     }
     constructor(){
         this.css.backgroundColor = "white";
-        this.css.fieldSize = "30";
+        this.css.fieldSize = "60";
         this.css.fontColor = "black";
         this.css.fontSize = "14";
+        this.css.fontFamily = "sans-serif";
+
+        this.gameTitle = "mineField game";
+        this.lifeNum = 0;
+        this.fieldWidth = 6;
+        this.fieldHeight = 5;
+        this.bombNum = 16;
+        this.plagNum = 0;
+        this.playerName = "player";
+        this.playTime = "00:00";
     }
     Create() {
-        const gamePage = document.createElement("div");
+        let div = document.createElement("div");
+        div.style.backgroundColor = "transparent";
+        div.style.fontSize = `${this.css.fontSize}pt`;
+        div.style.fontFamily = this.css.fontFamily;
+        div.style.fontColor = this.css.fontColor; 
+        div.style.display = "flex";
+        div.style.flexWrap = "wrap";
+        div.style.flexDirection = "column";
+
+        const gamePage = div.cloneNode(false);
         gamePage.className = "gamePage";
+
+        gamePage.appendChild(this.makeHead());
+        gamePage.appendChild(this.makeBody());
+
+        return gamePage;
     }
 
     makeHead(){
-        const pageHead = document.createElement("div");
-        pageHead.className = "gamePagehead";
-        pageHead.style.display = "block";
-        pageHead.style.alignItems = "center";
+        let div = document.createElement("div");
+        div.style.backgroundColor = "transparent";
+        div.style.fontSize = `${this.css.fontSize}pt`;
+        div.style.fontFamily = this.css.fontFamily;
+        div.style.fontColor = this.css.fontColor; 
+        div.style.display = "flex";
+        div.style.flexWrap = "wrap";
+        
 
-        const gameTitle = document.createElement("div");
+        const pageHead = div.cloneNode(false);
+        pageHead.style.justifyContent = "center";
+        pageHead.style.flexDirection = "column";
+
+        const gameTitle = div.cloneNode(false);
         gameTitle.innerText = "mine field game";
+        gameTitle.style.fontSize = `${this.css.fontSize * 2}pt`
+        gameTitle.style.justifyContent = "center";
+        pageHead.appendChild(gameTitle);
+        
+        const playerName = div.cloneNode(false);
+        playerName.innerText = `${this.gameInfo.playerName}`;
+        playerName.style.justifyContent = "center";
+        pageHead.appendChild(playerName);
 
-        const playerName = document.createElement("div");
+        const gameInfos = div.cloneNode(false);
+        gameInfos.style.justifyContent = "center";
+
+        const fieldNum = div.cloneNode(false);
+        fieldNum.innerText = `🟩${this.gameInfo.fieldWidth}x${this.gameInfo.fieldHeight} `;
+        const bombNum = div.cloneNode(false);
+        bombNum.innerText = `💣${this.gameInfo.bombNum}(${Math.floor(this.gameInfo.bombNum/(this.gameInfo.fieldWidth*this.gameInfo.fieldHeight) * 100)}%) `;
+        const plagNum = div.cloneNode(false);
+        plagNum.innerText = `🚩${this.gameInfo.plagNum} `;
+        const lifeNum = div.cloneNode(false);
+        lifeNum.innerText = `❤️${this.gameInfo.lifeNum} `;
+        const playTime = div.cloneNode(false);
+        playTime.innerText = `🕓${this.gameInfo.playTime} `;
+
         
-        const gameInfo = document.createElement("div");
-        const bombNum = document.createElement("div");
-        const plagNum = document.createElement("div");
-        const lifeNum = document.createElement("div");
-        const playTime = document.createElement("div");
-        
+        gameInfos.appendChild(fieldNum);
+        gameInfos.appendChild(bombNum);
+        gameInfos.appendChild(plagNum);
+        gameInfos.appendChild(lifeNum);
+        gameInfos.appendChild(playTime);
+
+        pageHead.appendChild(gameInfos);
+
+        return pageHead;
     }
+    makeBody() {
+        let div = document.createElement("div");
+        div.style.backgroundColor = "transparent";
+        div.style.fontSize = `${this.css.fieldSize}px`;
+        div.style.fontFamily = this.css.fontFamily;
+        div.style.fontColor = this.css.fontColor; 
+        div.style.display = "flex";
+        div.style.flexWrap = "wrap"; 
+
+        let btn = document.createElement("button");
+        //btn.style.backgroundColor = "transparent";
+        btn.style.padding = 0;
+        btn.style.border = 0;
+        btn.style.width = `${this.css.fieldSize}px`;
+        btn.style.height = `${this.css.fieldSize}px`;
+        btn.style.fontSize = `${this.css.fieldSize / 1.9}pt`;
+        btn.style.fontFamily = this.css.fontFamily;
+        btn.style.fontColor = this.css.fontColor; 
+        btn.style.display = "flex";
+        btn.style.alignItems = "center"; 
+        btn.style.justifyContent = "center"; 
+        
+        const field = div.cloneNode(false);
+        field.style.flexDirection = "column";
+        //bombBool; restBoomNum; openBool; flagBool;
+        let fieldInfo = makeMineFieldArray(this.gameInfo.fieldWidth, this.gameInfo.fieldHeight, this.gameInfo.bombNum);
+
+        for(let x=0; x<fieldInfo.length; x++){
+            const row = div.cloneNode(false);
+            row.style.justifyContent = "center";
+            for(let y=0; y<fieldInfo[x].length; y++){
+                const fieldN = btn.cloneNode(false);
+                fieldN.innerText = "🟩";
+                fieldN.value = fieldInfo[x][y].returnValue();
+                fieldN.className = `f_${x}_${y}`;
+                fieldN.addEventListener("click", this.fieldEvent);
+                row.appendChild(fieldN);
+            }
+            field.appendChild(row);
+        }
+        return field;
+    }
+
+
+
+    fieldEvent(event){
+        let value = event.target.value.split(",");
+        let info = {
+            bombBool : Number(value[0]), 
+            restBoomNum : Number(value[1]),
+            openBool : Number(value[2]),
+            flagBool : Number(value[3]),
+        } 
+
+        if(info.bombBool == 0){
+                //숫자 필드 - 단일
+            if(info.restBoomNum > 0){
+                info.openBool = 1;
+                event.target.value = `${info.bombBool},${info.restBoomNum},${info.openBool},${info.plagNum}`;
+                event.target.innerText = info.restBoomNum;
+                event.target.style.border = "none";
+            }else if(info.restBoomNum == 0){
+                //그냥 필드 - 연쇄
+                let xy = event.target.className.split('_');
+                emtyFieldRe(xy[1], xy[2]);
+            }
+        }else if(info.bombBool == 1){
+            //폭발 - 게임
+            info.openBool = 1;
+            event.target.value = `${info.bombBool},${info.restBoomNum},${info.openBool},${info.plagNum}`;
+            event.target.innerText = "💥";
+            event.target.style.border = "none";
+        }
+    }
+
     //머리 - 게임명, 폭탄수, 깃발수, 목숨 개수, 플탐 시간,  
     //본문 - 필드들
     //바닥 - 전체수
-
 }
 class field {
     //값 - 폭탄여부, 근처 폭탄 수, 공개 여부, 깃발 여부
@@ -113,7 +286,8 @@ function makeMineFieldArray(row, colum, bombNum) {
         for (let j = 0; j < colum; j++) { newArr.push(new field()); }
         array.push(newArr);
     }
-    bombCount = Math.floor((row * colum) * (bombNum / 100));
+    //bombCount = Math.floor((row * colum) * (bombNum / 100));
+    bombCount =bombNum;
 
     let RowArr = []; for (let i = 0; i < row; i++) { RowArr.push(i) };
     let ColumArr = []; for (let i = 0; i < colum; i++) { ColumArr.push(i) };
@@ -124,24 +298,21 @@ function makeMineFieldArray(row, colum, bombNum) {
 
     //폭탄 생성
     let exa = [];
+    
     exBombCount = 0;
     while (exBombCount < bombCount) {
         shuffle(RowArr); shuffle(ColumArr);
-        if (Math.floor(Math.random() * 2) == 1) {
-            exa.push([RowArr[0], ColumArr[0]]);
-            array[RowArr[0]][ColumArr[0]].bombBool = 1;
-            exBombCount += 1;
-        }
-    }
 
-    let rarrArr = [];
-    for (let i = 0; i < array.length; i++) {
-        rarrArr.push([])
-        for (let j = 0; j < array[i].length; j++) {
-            rarrArr[i].push(array[i][j].returnValue());
+        target = array[RowArr[0]][ColumArr[0]];
+        if(target.bombBool == 0){
+            if (Math.floor(Math.random() * 2) == 1) {
+                exa.push([RowArr[0], ColumArr[0]]);
+                target.bombBool = 1;
+                exBombCount += 1;
+            }
         }
     }
-    console.log(rarrArr);
+    console.log(bombCount, exBombCount);
     //폭탄 근처 필드 숫자 생성
     for (let i = 0; i < row; i++) {
         for (let j = 0; j < colum; j++) {
@@ -161,6 +332,16 @@ function makeMineFieldArray(row, colum, bombNum) {
         }
     }
 
+    ///** 결과 확인
+    let rarrArr = [];
+    for (let i = 0; i < array.length; i++) {
+        rarrArr.push([])
+        for (let j = 0; j < array[i].length; j++) {
+            rarrArr[i].push(array[i][j].returnValue());
+        }
+    }
+    console.log(rarrArr);
+    //*/
     return array;
 }
 
@@ -220,4 +401,7 @@ for (let i = 0; i < rarr.length; i++) {
         rarrArr[i].push(rarr[i][j].returnValue());
     }
 }
-console.log(rarrArr);
+
+const newGame = new gamePage(); 
+mainDiv.appendChild(newGame.Create());
+//console.log(rarrArr);
