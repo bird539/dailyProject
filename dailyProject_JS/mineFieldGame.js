@@ -29,7 +29,6 @@ class pipe_send {
 }
 const pipe = new pipe_get();
 
-
 function emtyFieldRe(x, y){
     let target = document.querySelector(`.f_${x}_${y}`);
     //console.log(x, y);
@@ -68,6 +67,18 @@ function emtyFieldRe(x, y){
     }
 }
 
+setInterval(secondTime, 1000);
+function secondTime(){
+    const target = "playTime";
+    let query = document.querySelector(`.${target}`);
+    let befoTime = query.innerText.split(":");
+    let m = Number(befoTime[0]);
+    let s = Number(befoTime[1]) + 1;
+    if(s > 59){ m += 1; s = 0;}
+    console.log(m, s);
+    query.innerText = `${m}:${s}`;
+}
+
 //실제 화면에 표시될 객체들
 class gamePage {
     css = {
@@ -85,7 +96,7 @@ class gamePage {
         bombNum : 5,
         plagNum : 0,
         playerName : "player",
-        playTime : "00:00"
+        playTime : "0:0"
     }
     constructor(){
         this.css.backgroundColor = "white";
@@ -130,11 +141,19 @@ class gamePage {
         div.style.fontColor = this.css.fontColor; 
         div.style.display = "flex";
         div.style.flexWrap = "wrap";
-        
+
+        let input = document.createElement("input");
+        input.style.backgroundColor = "transparent";
+        input.style.fontSize = `${this.css.fontSize}pt`;
+        input.style.fontFamily = this.css.fontFamily;
+        input.style.fontColor = this.css.fontColor; 
+        input.style.display = "flex";
+        input.style.flexWrap = "wrap";
 
         const pageHead = div.cloneNode(false);
         pageHead.style.justifyContent = "center";
         pageHead.style.flexDirection = "column";
+        pageHead.style.height = `${this.css.fontSize * 7}px`;
 
         const gameTitle = div.cloneNode(false);
         gameTitle.innerText = "mine field game";
@@ -142,32 +161,52 @@ class gamePage {
         gameTitle.style.justifyContent = "center";
         pageHead.appendChild(gameTitle);
         
-        const playerName = div.cloneNode(false);
-        playerName.innerText = `${this.gameInfo.playerName}`;
-        playerName.style.justifyContent = "center";
+        const playerName = input.cloneNode(false);
+        playerName.value = `${this.gameInfo.playerName}`;
+        playerName.style.textAlign = "center";
+        playerName.style.border = "0";
         pageHead.appendChild(playerName);
 
         const gameInfos = div.cloneNode(false);
         gameInfos.style.justifyContent = "center";
-
+        gameInfos.style.width = "100%";
+        
+        const gameInfosL = div.cloneNode(false);
+        gameInfosL.style.justifyContent = "left";
+        gameInfosL.style.width = "50%";
         const fieldNum = div.cloneNode(false);
+        fieldNum.style.paddingRight = "10px";
         fieldNum.innerText = `🟩${this.gameInfo.fieldWidth}x${this.gameInfo.fieldHeight} `;
         const bombNum = div.cloneNode(false);
+        bombNum.style.paddingRight = "10px";
         bombNum.innerText = `💣${this.gameInfo.bombNum}(${Math.floor(this.gameInfo.bombNum/(this.gameInfo.fieldWidth*this.gameInfo.fieldHeight) * 100)}%) `;
+        
+        const gameInfosR = div.cloneNode(false);
+        gameInfosR.style.justifyContent = "right";
+        gameInfosR.style.width = "50%";
         const plagNum = div.cloneNode(false);
+        plagNum.style.paddingRight = "10px";
         plagNum.innerText = `🚩${this.gameInfo.plagNum} `;
         const lifeNum = div.cloneNode(false);
+        lifeNum.style.paddingRight = "10px";
         lifeNum.innerText = `❤️${this.gameInfo.lifeNum} `;
+
+        const time = div.cloneNode(false);
+        time.innerText = `🕓`;
         const playTime = div.cloneNode(false);
-        playTime.innerText = `🕓${this.gameInfo.playTime} `;
+        playTime.innerText = `${this.gameInfo.playTime} `;
+        playTime.style.justifyContent = "right";
+        playTime.className = "playTime";
 
+        gameInfosR.appendChild(fieldNum);
+        gameInfosR.appendChild(bombNum);
+        gameInfosL.appendChild(plagNum);
+        gameInfosL.appendChild(lifeNum);
+        gameInfosL.appendChild(time);
+        gameInfosL.appendChild(playTime);
         
-        gameInfos.appendChild(fieldNum);
-        gameInfos.appendChild(bombNum);
-        gameInfos.appendChild(plagNum);
-        gameInfos.appendChild(lifeNum);
-        gameInfos.appendChild(playTime);
-
+        gameInfos.appendChild(gameInfosR);
+        gameInfos.appendChild(gameInfosL);
         pageHead.appendChild(gameInfos);
 
         return pageHead;
@@ -214,6 +253,43 @@ class gamePage {
         }
         return field;
     }
+    makeFoot(){
+        let div = document.createElement("div");
+        div.style.backgroundColor = "transparent";
+        div.style.fontSize = `${this.css.fontSize}pt`;
+        div.style.fontFamily = this.css.fontFamily;
+        div.style.fontColor = this.css.fontColor; 
+        div.style.display = "flex";
+        div.style.flexWrap = "wrap";
+
+        let input = document.createElement("input");
+        input.style.backgroundColor = "transparent";
+        input.style.fontSize = `${this.css.fontSize}pt`;
+        input.style.fontFamily = this.css.fontFamily;
+        input.style.fontColor = this.css.fontColor; 
+        input.style.display = "flex";
+        input.style.flexWrap = "wrap";
+
+        const pageFoot = div.cloneNode(false);
+        pageFoot.style.justifyContent = "center";
+        pageFoot.style.flexDirection = "column";
+        const answer = div.cloneNode(false);
+        answer.style.fontSize = `${this.css.fontSize * 2}pt`;
+        answer.innerText = "success or fail"
+
+        const playerName = div.cloneNode(false);
+        playerName.innerText = `${this.gameInfo.playerName}`;
+
+        
+        const record1 = `🟩${this.gameInfo.fieldWidth}x${this.gameInfo.fieldHeight} 💣${this.bombNum}(${Math.floor(this.gameInfo.bombNum/(this.gameInfo.fieldWidth*this.gameInfo.fieldHeight) * 100)}%) 🚩${this.gameInfo.plagNum} ❤️${this.gameInfo.lifeNum} 🕓${this.gameInfo.playTime}`
+        const record2 = `${Date()}`;
+
+        
+
+
+        return pageFoot;
+    }
+
 
 
 
@@ -249,7 +325,7 @@ class gamePage {
 
     //머리 - 게임명, 폭탄수, 깃발수, 목숨 개수, 플탐 시간,  
     //본문 - 필드들
-    //바닥 - 전체수
+    //바닥 - 게임 결과, 플레이어명, 점수(기존 세팅), 날짜, 순위표
 }
 class field {
     //값 - 폭탄여부, 근처 폭탄 수, 공개 여부, 깃발 여부
@@ -312,7 +388,7 @@ function makeMineFieldArray(row, colum, bombNum) {
             }
         }
     }
-    console.log(bombCount, exBombCount);
+    //console.log(bombCount, exBombCount);
     //폭탄 근처 필드 숫자 생성
     for (let i = 0; i < row; i++) {
         for (let j = 0; j < colum; j++) {
@@ -332,7 +408,7 @@ function makeMineFieldArray(row, colum, bombNum) {
         }
     }
 
-    ///** 결과 확인
+    /** 결과 확인
     let rarrArr = [];
     for (let i = 0; i < array.length; i++) {
         rarrArr.push([])
@@ -341,7 +417,7 @@ function makeMineFieldArray(row, colum, bombNum) {
         }
     }
     console.log(rarrArr);
-    //*/
+    */
     return array;
 }
 
