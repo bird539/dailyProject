@@ -29,76 +29,161 @@ class pipe_send {
 }
 const pipe = new pipe_get();
 
-function emtyFieldRe(x, y){
+function emtyFieldRe(x, y) {
     let target = document.querySelector(`.f_${x}_${y}`);
     //console.log(x, y);
     //console.log(target);
-    if(target == null){ return; }
+    if (target == null) { return; }
     let value = target.value.split(",");
     let info = {
-        bombBool : Number(value[0]), 
-        restBoomNum : Number(value[1]),
-        openBool : Number(value[2]),
-        flagBool : Number(value[3]),
-    } 
-    if(info.openBool == 0){
-        if(info.restBoomNum == 0){
+        bombBool: Number(value[0]),
+        restBoomNum: Number(value[1]),
+        openBool: Number(value[2]),
+        flagBool: Number(value[3]),
+    }
+    if (info.openBool == 0) {
+        if (info.restBoomNum == 0) {
             target.innerText = " ";
-            target.style.border = "none";
+            target.style.border = "none"; succesEvent();
             info.openBool = 1;
             target.value = `${info.bombBool},${info.restBoomNum},${info.openBool},${info.plagNum}`;
             x = Number(x); y = Number(y);
 
-            emtyFieldRe(x + 1,  y); //위
-            emtyFieldRe(x - 1,  y); //아래 
-            emtyFieldRe(x , y - 1); //왼옆
-            emtyFieldRe(x , y - 1); //오엽
-            
+            emtyFieldRe(x + 1, y); //위
+            emtyFieldRe(x - 1, y); //아래 
+            emtyFieldRe(x, y - 1); //왼옆
+            emtyFieldRe(x, y - 1); //오엽
+
             emtyFieldRe(x + 1, y - 1); //대각선 위 왼
             emtyFieldRe(x + 1, y + 1); //대각선 위 오
             emtyFieldRe(x - 1, y - 1); //대각선 아래 왼
             emtyFieldRe(x - 1, y + 1); //대각선 아래 오
-        }else if(info.restBoomNum > 0){
+        } else if (info.restBoomNum > 0) {
             info.openBool = 1;
             target.value = `${info.bombBool},${info.restBoomNum},${info.openBool},${info.plagNum}`;
-            target.innerText = info.restBoomNum;
-            target.style.border = "none";
+            target.innerText = info.restBoomNum; 
+            target.style.border = "none"; succesEvent();
         }
     }
 }
 
 setInterval(secondTime, 1000);
-function secondTime(){
+function secondTime() {
     const target = "playTime";
     let query = document.querySelector(`.${target}`);
     let befoTime = query.innerText.split(":");
     let m = Number(befoTime[0]);
     let s = Number(befoTime[1]) + 1;
-    if(s > 59){ m += 1; s = 0;}
-    console.log(m, s);
+    if (s > 59) { m += 1; s = 0; }
+    //console.log(m, s);
     query.innerText = `${m}:${s}`;
 }
+function boomDieEvent() {
+    const answerDiv = document.querySelector(".answerDiv");
+    answerDiv.innerText = "faile"
 
+    const field = document.querySelector(".field");
+    //console.log(field.childNodes, field.childNodes.length, field.childNodes[0].childNodes.length, field.childNodes[0].childNodes[0]);
+    for (let i = 0; i < field.childNodes.length; i++) {
+        for (let j = 0; j < field.childNodes[i].childNodes.length; j++) {
+            const target = field.childNodes[i].childNodes[j];
+            let value = target.value.split(",");
+            let info = {
+                bombBool: Number(value[0]),
+                restBoomNum: Number(value[1]),
+                openBool: Number(value[2]),
+                flagBool: Number(value[3]),
+            }
+            if (target.style.border != "none") {
+                if (info.bombBool == 0) {
+                    //숫자 필드 - 단일
+                    if (info.restBoomNum > 0) {
+                        target.innerText = info.restBoomNum;
+                    } else if (info.restBoomNum == 0) {
+                        //그냥 필드
+                        target.innerText = "";
+                    }
+                } else if (info.bombBool == 1) {
+                    //폭발 - 게임
+                    target.innerText = "💥";
+                }
+                info.openBool = 1;
+                target.value = `${info.bombBool},${info.restBoomNum},${info.openBool},${info.plagNum}`;
+                target.style.border = "none";
+            }
+        }
+    }
+
+    const pageFoot = document.querySelector(".pageFoot");
+    let playTime = document.querySelector(`.playTime`);
+    let record2 = document.querySelector(`.record2`);
+    record2.innerText = "🕓" + playTime.innerText;
+    
+    pageFoot.style.display = "flex";
+}
+
+function succesEvent() {
+    //score.innerText = `${this.gameInfo.fieldWidth * this.gameInfo.fieldHeight}/${this.gameInfo.bombNum}`;
+
+    const score = document.querySelector(".score");
+    let array = score.innerText.split("/"); 
+    let fieldN = Number(array[0]) - 1;
+    let bombN = Number(array[1]);
+    score.innerText = `${fieldN}/${bombN}`;
+
+    if(fieldN == bombN){
+        const field = document.querySelector(".field");
+        for (let i = 0; i < field.childNodes.length; i++) {
+            for (let j = 0; j < field.childNodes[i].childNodes.length; j++) {
+                const target = field.childNodes[i].childNodes[j];
+                let value = target.value.split(",");
+                let info = {
+                    bombBool: Number(value[0]),
+                    restBoomNum: Number(value[1]),
+                    openBool: Number(value[2]),
+                    flagBool: Number(value[3]),
+                }
+                if (target.style.border != "none") {
+                    if (info.bombBool == 1) {
+                        //폭발 - 게임
+                        target.innerText = "💥";
+                    }
+                    info.openBool = 1;
+                    target.value = `${info.bombBool},${info.restBoomNum},${info.openBool},${info.plagNum}`;
+                    target.style.border = "none";
+                }
+            }
+        }
+        let playTime = document.querySelector(`.playTime`);
+        let record2 = document.querySelector(`.record2`);
+        record2.innerText = "🕓" + playTime.innerText;
+        
+        const answerDiv = document.querySelector(".answerDiv");
+        answerDiv.innerText = "success";
+        const pageFoot = document.querySelector(".pageFoot");
+        pageFoot.style.display = "flex";
+    }
+}
 //실제 화면에 표시될 객체들
 class gamePage {
     css = {
-        backgroundColor : "white",
-        fieldSize :"30",
-        fontColor :"black",
-        fontSize :"14",
-        fontFamily :"sans-serif"
+        backgroundColor: "white",
+        fieldSize: "30",
+        fontColor: "black",
+        fontSize: "14",
+        fontFamily: "sans-serif"
     }
     gameInfo = {
-        gameTitle : "mineField game",
-        lifeNum : 0,
-        fieldWidth : 6,
-        fieldHeight : 5,
-        bombNum : 5,
-        plagNum : 0,
-        playerName : "player",
-        playTime : "0:0"
+        gameTitle: "mineField game",
+        lifeNum: 0,
+        fieldWidth: 6,
+        fieldHeight: 5,
+        bombNum: 5,
+        plagNum: 0,
+        playerName: "player",
+        playTime: "0:0"
     }
-    constructor(){
+    constructor() {
         this.css.backgroundColor = "white";
         this.css.fieldSize = "60";
         this.css.fontColor = "black";
@@ -119,7 +204,7 @@ class gamePage {
         div.style.backgroundColor = "transparent";
         div.style.fontSize = `${this.css.fontSize}pt`;
         div.style.fontFamily = this.css.fontFamily;
-        div.style.fontColor = this.css.fontColor; 
+        div.style.fontColor = this.css.fontColor;
         div.style.display = "flex";
         div.style.flexWrap = "wrap";
         div.style.flexDirection = "column";
@@ -129,16 +214,17 @@ class gamePage {
 
         gamePage.appendChild(this.makeHead());
         gamePage.appendChild(this.makeBody());
+        gamePage.appendChild(this.makeFoot());
 
         return gamePage;
     }
 
-    makeHead(){
+    makeHead() {
         let div = document.createElement("div");
         div.style.backgroundColor = "transparent";
         div.style.fontSize = `${this.css.fontSize}pt`;
         div.style.fontFamily = this.css.fontFamily;
-        div.style.fontColor = this.css.fontColor; 
+        div.style.fontColor = this.css.fontColor;
         div.style.display = "flex";
         div.style.flexWrap = "wrap";
 
@@ -146,7 +232,7 @@ class gamePage {
         input.style.backgroundColor = "transparent";
         input.style.fontSize = `${this.css.fontSize}pt`;
         input.style.fontFamily = this.css.fontFamily;
-        input.style.fontColor = this.css.fontColor; 
+        input.style.fontColor = this.css.fontColor;
         input.style.display = "flex";
         input.style.flexWrap = "wrap";
 
@@ -160,7 +246,7 @@ class gamePage {
         gameTitle.style.fontSize = `${this.css.fontSize * 2}pt`
         gameTitle.style.justifyContent = "center";
         pageHead.appendChild(gameTitle);
-        
+
         const playerName = input.cloneNode(false);
         playerName.value = `${this.gameInfo.playerName}`;
         playerName.style.textAlign = "center";
@@ -170,7 +256,7 @@ class gamePage {
         const gameInfos = div.cloneNode(false);
         gameInfos.style.justifyContent = "center";
         gameInfos.style.width = "100%";
-        
+
         const gameInfosL = div.cloneNode(false);
         gameInfosL.style.justifyContent = "left";
         gameInfosL.style.width = "50%";
@@ -179,8 +265,8 @@ class gamePage {
         fieldNum.innerText = `🟩${this.gameInfo.fieldWidth}x${this.gameInfo.fieldHeight} `;
         const bombNum = div.cloneNode(false);
         bombNum.style.paddingRight = "10px";
-        bombNum.innerText = `💣${this.gameInfo.bombNum}(${Math.floor(this.gameInfo.bombNum/(this.gameInfo.fieldWidth*this.gameInfo.fieldHeight) * 100)}%) `;
-        
+        bombNum.innerText = `💣${this.gameInfo.bombNum}(${Math.floor(this.gameInfo.bombNum / (this.gameInfo.fieldWidth * this.gameInfo.fieldHeight) * 100)}%) `;
+
         const gameInfosR = div.cloneNode(false);
         gameInfosR.style.justifyContent = "right";
         gameInfosR.style.width = "50%";
@@ -204,7 +290,7 @@ class gamePage {
         gameInfosL.appendChild(lifeNum);
         gameInfosL.appendChild(time);
         gameInfosL.appendChild(playTime);
-        
+
         gameInfos.appendChild(gameInfosR);
         gameInfos.appendChild(gameInfosL);
         pageHead.appendChild(gameInfos);
@@ -216,9 +302,9 @@ class gamePage {
         div.style.backgroundColor = "transparent";
         div.style.fontSize = `${this.css.fieldSize}px`;
         div.style.fontFamily = this.css.fontFamily;
-        div.style.fontColor = this.css.fontColor; 
+        div.style.fontColor = this.css.fontColor;
         div.style.display = "flex";
-        div.style.flexWrap = "wrap"; 
+        div.style.flexWrap = "wrap";
 
         let btn = document.createElement("button");
         //btn.style.backgroundColor = "transparent";
@@ -228,20 +314,20 @@ class gamePage {
         btn.style.height = `${this.css.fieldSize}px`;
         btn.style.fontSize = `${this.css.fieldSize / 1.9}pt`;
         btn.style.fontFamily = this.css.fontFamily;
-        btn.style.fontColor = this.css.fontColor; 
+        btn.style.fontColor = this.css.fontColor;
         btn.style.display = "flex";
-        btn.style.alignItems = "center"; 
-        btn.style.justifyContent = "center"; 
-        
+        btn.style.alignItems = "center";
+        btn.style.justifyContent = "center";
+
         const field = div.cloneNode(false);
         field.style.flexDirection = "column";
         //bombBool; restBoomNum; openBool; flagBool;
         let fieldInfo = makeMineFieldArray(this.gameInfo.fieldWidth, this.gameInfo.fieldHeight, this.gameInfo.bombNum);
 
-        for(let x=0; x<fieldInfo.length; x++){
+        for (let x = 0; x < fieldInfo.length; x++) {
             const row = div.cloneNode(false);
             row.style.justifyContent = "center";
-            for(let y=0; y<fieldInfo[x].length; y++){
+            for (let y = 0; y < fieldInfo[x].length; y++) {
                 const fieldN = btn.cloneNode(false);
                 fieldN.innerText = "🟩";
                 fieldN.value = fieldInfo[x][y].returnValue();
@@ -251,98 +337,97 @@ class gamePage {
             }
             field.appendChild(row);
         }
+        field.className = "field";
         return field;
     }
-    makeFoot(){
+    makeFoot() {
         let div = document.createElement("div");
         div.style.backgroundColor = "transparent";
         div.style.fontSize = `${this.css.fontSize}pt`;
         div.style.fontFamily = this.css.fontFamily;
-        div.style.fontColor = this.css.fontColor; 
+        div.style.fontColor = this.css.fontColor;
         div.style.display = "flex";
         div.style.flexWrap = "wrap";
+
+        div.style.justifyContent = "center";
 
         let input = document.createElement("input");
         input.style.backgroundColor = "transparent";
         input.style.fontSize = `${this.css.fontSize}pt`;
         input.style.fontFamily = this.css.fontFamily;
-        input.style.fontColor = this.css.fontColor; 
+        input.style.fontColor = this.css.fontColor;
         input.style.display = "flex";
         input.style.flexWrap = "wrap";
 
         const pageFoot = div.cloneNode(false);
         pageFoot.style.justifyContent = "center";
         pageFoot.style.flexDirection = "column";
+        pageFoot.style.display = "none";
         const answer = div.cloneNode(false);
         answer.style.fontSize = `${this.css.fontSize * 2}pt`;
+        answer.className = "answerDiv";
         answer.innerText = "success or fail"
 
         const playerName = div.cloneNode(false);
         playerName.innerText = `${this.gameInfo.playerName}`;
 
+        const record1 = div.cloneNode(false);
+        record1.innerText = `🟩${this.gameInfo.fieldWidth}x${this.gameInfo.fieldHeight} 💣${this.bombNum}(${Math.floor(this.gameInfo.bombNum / (this.gameInfo.fieldWidth * this.gameInfo.fieldHeight) * 100)}%) 🚩${this.gameInfo.plagNum} ❤️${this.gameInfo.lifeNum} 🕓${this.gameInfo.playTime}`
         
-        const record1 = `🟩${this.gameInfo.fieldWidth}x${this.gameInfo.fieldHeight} 💣${this.bombNum}(${Math.floor(this.gameInfo.bombNum/(this.gameInfo.fieldWidth*this.gameInfo.fieldHeight) * 100)}%) 🚩${this.gameInfo.plagNum} ❤️${this.gameInfo.lifeNum} 🕓${this.gameInfo.playTime}`
-        const record2 = `${Date()}`;
-
         
+        const record2 = div.cloneNode(false);
+        record2.innerText  = `${Date()}`;
+        record2.className = "record2";
+
+        const score = div.cloneNode(false);
+        score.className = "score";
+        score.style.display = "none";
+        score.innerText = `${this.gameInfo.fieldWidth * this.gameInfo.fieldHeight}/${this.gameInfo.bombNum}`;
 
 
+        pageFoot.appendChild(answer);
+        pageFoot.appendChild(playerName);
+        pageFoot.appendChild(record1);
+        pageFoot.appendChild(record2);
+        pageFoot.appendChild(score);
+        pageFoot.className = "pageFoot";
         return pageFoot;
     }
-
-
-
-
-    fieldEvent(event){
+    fieldEvent(event) {
         let value = event.target.value.split(",");
         let info = {
-            bombBool : Number(value[0]), 
-            restBoomNum : Number(value[1]),
-            openBool : Number(value[2]),
-            flagBool : Number(value[3]),
-        } 
+            bombBool: Number(value[0]),
+            restBoomNum: Number(value[1]),
+            openBool: Number(value[2]),
+            flagBool: Number(value[3]),
+        }
 
-        if(info.bombBool == 0){
-                //숫자 필드 - 단일
-            if(info.restBoomNum > 0){
+        if (info.bombBool == 0) {
+            //숫자 필드 - 단일
+            if (info.restBoomNum > 0) {
                 info.openBool = 1;
                 event.target.value = `${info.bombBool},${info.restBoomNum},${info.openBool},${info.plagNum}`;
+                if(event.target.innerText == "🟩"){succesEvent();}
                 event.target.innerText = info.restBoomNum;
                 event.target.style.border = "none";
-            }else if(info.restBoomNum == 0){
+            } else if (info.restBoomNum == 0) {
                 //그냥 필드 - 연쇄
                 let xy = event.target.className.split('_');
                 emtyFieldRe(xy[1], xy[2]);
             }
-        }else if(info.bombBool == 1){
+        } else if (info.bombBool == 1) {
             //폭발 - 게임
             info.openBool = 1;
             event.target.value = `${info.bombBool},${info.restBoomNum},${info.openBool},${info.plagNum}`;
             event.target.innerText = "💥";
             event.target.style.border = "none";
+            boomDieEvent();
         }
     }
 
     //머리 - 게임명, 폭탄수, 깃발수, 목숨 개수, 플탐 시간,  
     //본문 - 필드들
     //바닥 - 게임 결과, 플레이어명, 점수(기존 세팅), 날짜, 순위표
-}
-class field {
-    //값 - 폭탄여부, 근처 폭탄 수, 공개 여부, 깃발 여부
-    //공개 전 배경 - 깃발여부 | 공개 후 배경 - 빈 배경, 근처 폭탄 숫자, 폭탄 배경
-    //공개 이벤트(폭탄 폭발, 폭판 수 공간 공개, 빈 공간 공개)
-    //깃발 이벤트(깃발 추가)  
-}
-class remote {
-    //새로운 게임 세팅 후 시작 - 필드 크기, 폭탄 비율 or 폭탄 수 
-    //현재에서 재시작
-    //화면 css 조정 - 글자크기, 배경색
-    //기록 보기 - 성공 / 실패 (순위, 게임일자, 플레이어명, 필드, 폭탄비율(개수), 목숨 수, 플레이시간)
-}
-class resultPage {
-    //머리 - 게임명, 승리여부
-    //본문 - 총 계산 점수, 순위, 게임 플레이어명 입력란
-    //바닥 - 게임 플레이어 순위(점수로, 성공여부로 나눠서,)
 }
 
 function makeMineFieldArray(row, colum, bombNum) {
@@ -363,7 +448,7 @@ function makeMineFieldArray(row, colum, bombNum) {
         array.push(newArr);
     }
     //bombCount = Math.floor((row * colum) * (bombNum / 100));
-    bombCount =bombNum;
+    bombCount = bombNum;
 
     let RowArr = []; for (let i = 0; i < row; i++) { RowArr.push(i) };
     let ColumArr = []; for (let i = 0; i < colum; i++) { ColumArr.push(i) };
@@ -374,13 +459,13 @@ function makeMineFieldArray(row, colum, bombNum) {
 
     //폭탄 생성
     let exa = [];
-    
+
     exBombCount = 0;
     while (exBombCount < bombCount) {
         shuffle(RowArr); shuffle(ColumArr);
 
         target = array[RowArr[0]][ColumArr[0]];
-        if(target.bombBool == 0){
+        if (target.bombBool == 0) {
             if (Math.floor(Math.random() * 2) == 1) {
                 exa.push([RowArr[0], ColumArr[0]]);
                 target.bombBool = 1;
@@ -478,6 +563,6 @@ for (let i = 0; i < rarr.length; i++) {
     }
 }
 
-const newGame = new gamePage(); 
+const newGame = new gamePage();
 mainDiv.appendChild(newGame.Create());
 //console.log(rarrArr);
